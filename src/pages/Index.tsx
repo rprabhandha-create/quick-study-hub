@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Flashcard } from "@/components/Flashcard";
 import { SubjectCard } from "@/components/SubjectCard";
-import { BookOpen, Calculator, Atom, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { RevisionChat } from "@/components/RevisionChat";
+import { BookOpen, Calculator, Atom, Globe, ChevronLeft, ChevronRight, MessageSquare, GraduationCap } from "lucide-react";
 
 const subjects = [
   { id: "math", title: "Mathematics", icon: Calculator, color: "primary" as const, count: 24 },
@@ -45,91 +47,103 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       {/* Hero Section */}
-      <header className="container mx-auto px-4 py-16 text-center animate-fade-in">
+      <header className="container mx-auto px-4 py-12 text-center animate-fade-in">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <BookOpen className="w-12 h-12 text-primary" />
+          <GraduationCap className="w-12 h-12 text-primary" />
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            QuickRevise
+            QuickRevise AI
           </h1>
         </div>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Master your subjects with interactive flashcards. Study smarter, not harder.
+        <p className="text-xl text-muted-foreground mb-4 max-w-2xl mx-auto">
+          Your AI-powered revision assistant. Get summaries, flashcards, practice questions & more - instantly!
         </p>
-        {!selectedSubject && (
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
-            onClick={() => setSelectedSubject("math")}
-          >
-            Start Revising Now
-          </Button>
-        )}
       </header>
 
-      {/* Subject Selection or Flashcard View */}
+      {/* Main Content */}
       <main className="container mx-auto px-4 pb-16">
-        {!selectedSubject ? (
-          <div className="max-w-4xl mx-auto animate-slide-up">
-            <h2 className="text-3xl font-bold text-center mb-8">Choose Your Subject</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {subjects.map((subject) => (
-                <SubjectCard
-                  key={subject.id}
-                  title={subject.title}
-                  icon={subject.icon}
-                  count={subject.count}
-                  color={subject.color}
-                  onClick={() => setSelectedSubject(subject.id)}
+        <Tabs defaultValue="chat" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+            <TabsTrigger value="chat" className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              AI Assistant
+            </TabsTrigger>
+            <TabsTrigger value="flashcards" className="gap-2">
+              <BookOpen className="w-4 h-4" />
+              Flashcards
+            </TabsTrigger>
+          </TabsList>
+
+          {/* AI Chat Tab */}
+          <TabsContent value="chat" className="min-h-[600px]">
+            <RevisionChat />
+          </TabsContent>
+
+          {/* Flashcards Tab */}
+          <TabsContent value="flashcards">
+            {!selectedSubject ? (
+              <div className="max-w-4xl mx-auto animate-slide-up">
+                <h2 className="text-3xl font-bold text-center mb-8">Choose Your Subject</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {subjects.map((subject) => (
+                    <SubjectCard
+                      key={subject.id}
+                      title={subject.title}
+                      icon={subject.icon}
+                      count={subject.count}
+                      color={subject.color}
+                      onClick={() => setSelectedSubject(subject.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="max-w-2xl mx-auto animate-fade-in">
+                <div className="flex items-center justify-between mb-8">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedSubject(null);
+                      setCurrentCardIndex(0);
+                    }}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Back to Subjects
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Card {currentCardIndex + 1} of {currentFlashcards.length}
+                  </span>
+                </div>
+
+                <Flashcard
+                  question={currentFlashcards[currentCardIndex].question}
+                  answer={currentFlashcards[currentCardIndex].answer}
+                  category={currentFlashcards[currentCardIndex].category}
                 />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto animate-fade-in">
-            <div className="flex items-center justify-between mb-8">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedSubject(null);
-                  setCurrentCardIndex(0);
-                }}
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Back to Subjects
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Card {currentCardIndex + 1} of {currentFlashcards.length}
-              </span>
-            </div>
 
-            <Flashcard
-              question={currentFlashcards[currentCardIndex].question}
-              answer={currentFlashcards[currentCardIndex].answer}
-              category={currentFlashcards[currentCardIndex].category}
-            />
-
-            <div className="flex justify-center gap-4 mt-8">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={prevCard}
-                disabled={currentFlashcards.length <= 1}
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-primary to-secondary"
-                onClick={nextCard}
-                disabled={currentFlashcards.length <= 1}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </div>
-        )}
+                <div className="flex justify-center gap-4 mt-8">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={prevCard}
+                    disabled={currentFlashcards.length <= 1}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Previous
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-secondary"
+                    onClick={nextCard}
+                    disabled={currentFlashcards.length <= 1}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
